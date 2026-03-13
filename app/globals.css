@@ -403,3 +403,112 @@ body {
     align-items: flex-start;
   }
 }
+/* === Paste at the bottom of globals.css === */
+
+/* Private repo token toggle */
+.private-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  justify-content: flex-start;
+  padding-left: 4px;
+}
+
+.private-toggle {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-family: 'Syne', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.private-toggle:hover {
+  color: var(--text);
+}
+
+.toggle-arrow {
+  font-size: 0.65rem;
+  opacity: 0.6;
+}
+
+.clear-token {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-family: 'JetBrains Mono', monospace;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.clear-token:hover {
+  color: #ff6b6b;
+}
+
+.token-box {
+  margin-top: 8px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  text-align: left;
+}
+
+.token-input {
+  width: 100%;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+.token-input::placeholder {
+  color: var(--muted);
+}
+
+.token-hint {
+  font-size: 0.75rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.token-hint code {
+  background: rgba(124, 106, 255, 0.12);
+  color: var(--accent);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.token-link {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.token-link:hover {
+  text-decoration: underline;
+}
+
+/* Offline cache badge */
+.cache-badge {
+  display: inline-block;
+  background: rgba(74, 222, 128, 0.08);
+  border: 1px solid rgba(74, 222, 128, 0.25);
+  color: var(--success);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 16px;
+}

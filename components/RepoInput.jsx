@@ -1,8 +1,14 @@
 'use client'
 import { useState } from 'react'
 
-export default function RepoInput({ onGenerate, loading }) {
+export default function RepoInput({
+  onGenerate,
+  loading,
+  userToken,
+  onTokenChange,
+}) {
   const [url, setUrl] = useState('')
+  const [showToken, setShowToken] = useState(false)
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -57,6 +63,52 @@ export default function RepoInput({ onGenerate, loading }) {
             )}
           </button>
         </div>
+
+        {/* Private repo toggle */}
+        <div className="private-row">
+          <button
+            type="button"
+            className="private-toggle"
+            onClick={() => setShowToken((v) => !v)}
+          >
+            {userToken ? '🔒 Private repo token saved' : '🔑 Private repo?'}
+            <span className="toggle-arrow">{showToken ? '▲' : '▼'}</span>
+          </button>
+          {userToken && !showToken && (
+            <button
+              type="button"
+              className="clear-token"
+              onClick={() => onTokenChange('')}
+            >
+              remove
+            </button>
+          )}
+        </div>
+
+        {showToken && (
+          <div className="token-box">
+            <input
+              type="password"
+              value={userToken}
+              onChange={(e) => onTokenChange(e.target.value)}
+              placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+              className="token-input"
+              autoComplete="off"
+            />
+            <p className="token-hint">
+              Needs <code>repo</code> scope. Saved in your browser only — never
+              sent to our servers except to call GitHub's API.{' '}
+              <a
+                href="https://github.com/settings/tokens/new?scopes=repo&description=GitDoc"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="token-link"
+              >
+                Create one ↗
+              </a>
+            </p>
+          </div>
+        )}
       </form>
 
       <div className="examples">

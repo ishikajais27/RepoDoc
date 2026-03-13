@@ -1,51 +1,5 @@
-// 'use client'
-// import { useState } from 'react'
-// import RepoInput from './RepoInput'
-// import DocOutput from './DocOutput'
-
-// export default function HomeClient() {
-//   const [loading, setLoading] = useState(false)
-//   const [result, setResult] = useState(null)
-//   const [error, setError] = useState('')
-
-//   const handleGenerate = async (url) => {
-//     setLoading(true)
-//     setError('')
-//     setResult(null)
-
-//     try {
-//       const res = await fetch('/api/generate', {
-//         method: 'POST',
-//         headers: { 'Content-Type': 'application/json' },
-//         body: JSON.stringify({ url }),
-//       })
-//       const data = await res.json()
-//       if (!res.ok) throw new Error(data.error)
-//       setResult(data)
-//     } catch (err) {
-//       setError(err.message)
-//     } finally {
-//       setLoading(false)
-//     }
-//   }
-
-//   return (
-//     <main className="main">
-//       <RepoInput onGenerate={handleGenerate} loading={loading} />
-//       {loading && (
-//         <div className="loading-state">
-//           <div className="spinner" />
-//           <p>Analyzing repo and generating docs with Groq AI...</p>
-//           <small>This takes 15–30 seconds</small>
-//         </div>
-//       )}
-//       {error && <div className="error-box">❌ {error}</div>}
-//       {result && <DocOutput data={result} />}
-//     </main>
-//   )
-// }
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import RepoInput from './RepoInput'
 import DocOutput from './DocOutput'
 
@@ -55,19 +9,73 @@ const LOADING_MESSAGES = [
   'Writing docs that actually make sense...',
 ]
 
+const CACHE_PREFIX = 'gitdoc_cache_'
+const CACHE_TTL = 7 * 24 * 60 * 60 * 1000 // 7 days
+
+function getCached(url) {
+  try {
+    const raw = localStorage.getItem(CACHE_PREFIX + url)
+    if (!raw) return null
+    const { data, ts } = JSON.parse(raw)
+    if (Date.now() - ts > CACHE_TTL) {
+      localStorage.removeItem(CACHE_PREFIX + url)
+      return null
+    }
+    return data
+  } catch {
+    return null
+  }
+}
+
+function setCache(url, data) {
+  try {
+    localStorage.setItem(
+      CACHE_PREFIX + url,
+      JSON.stringify({ data, ts: Date.now() }),
+    )
+  } catch {}
+}
+
 export default function HomeClient() {
   const [loading, setLoading] = useState(false)
   const [loadingMsg, setLoadingMsg] = useState(0)
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
+  const [fromCache, setFromCache] = useState(false)
+  const [userToken, setUserToken] = useState('')
+
+  // Restore saved token on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('gitdoc_user_token')
+      if (saved) setUserToken(saved)
+    } catch {}
+  }, [])
+
+  const handleTokenChange = (t) => {
+    setUserToken(t)
+    try {
+      if (t) localStorage.setItem('gitdoc_user_token', t)
+      else localStorage.removeItem('gitdoc_user_token')
+    } catch {}
+  }
 
   const handleGenerate = async (url) => {
+    // Serve from cache if available (offline support)
+    const cached = getCached(url)
+    if (cached) {
+      setResult(cached)
+      setFromCache(true)
+      setError('')
+      return
+    }
+
     setLoading(true)
     setError('')
     setResult(null)
+    setFromCache(false)
     setLoadingMsg(0)
 
-    // Cycle through loading messages
     const interval = setInterval(() => {
       setLoadingMsg((prev) => (prev + 1) % LOADING_MESSAGES.length)
     }, 5000)
@@ -76,11 +84,12 @@ export default function HomeClient() {
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url, userToken: userToken || null }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
       setResult(data)
+      setCache(url, data)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -91,7 +100,12 @@ export default function HomeClient() {
 
   return (
     <main className="main">
-      <RepoInput onGenerate={handleGenerate} loading={loading} />
+      <RepoInput
+        onGenerate={handleGenerate}
+        loading={loading}
+        userToken={userToken}
+        onTokenChange={handleTokenChange}
+      />
       {loading && (
         <div className="loading-state">
           <div className="spinner" />
@@ -100,7 +114,16 @@ export default function HomeClient() {
         </div>
       )}
       {error && <div className="error-box">❌ {error}</div>}
-      {result && <DocOutput data={result} />}
+      {result && (
+        <>
+          {fromCache && (
+            <div className="cache-badge">
+              ⚡ Loaded from cache · available offline
+            </div>
+          )}
+          <DocOutput data={result} />
+        </>
+      )}
     </main>
   )
 }

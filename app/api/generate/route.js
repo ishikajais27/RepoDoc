@@ -26,11 +26,12 @@ async function callGroq(prompt) {
 
 export async function POST(req) {
   try {
-    const { url } = await req.json()
+    const { url, userToken } = await req.json()
     if (!url) return Response.json({ error: 'URL required' }, { status: 400 })
 
     const { owner, repo } = await parseRepoUrl(url)
-    const repoData = await fetchRepoData(owner, repo)
+    // userToken (user's own PAT) takes priority over server GITHUB_TOKEN
+    const repoData = await fetchRepoData(owner, repo, userToken)
 
     // Groq free tier has rate limits, so run sequentially to avoid 429s
     const userDoc = await callGroq(buildUserDocPrompt(repoData))
