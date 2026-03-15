@@ -1,4 +1,4 @@
-import { fetchRepoData, parseRepoUrl } from '../../../lib/github'
+import { parseRepoUrl, fetchRepoData } from '../../../lib/github'
 import {
   buildDevDocPrompt,
   buildReadmePrompt,
