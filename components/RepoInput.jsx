@@ -1,6 +1,29 @@
 'use client'
 import { useState } from 'react'
 
+const DOC_OPTIONS = [
+  {
+    id: 'user',
+    label: '👤 User Docs',
+    desc: 'Plain-English guide for end users',
+  },
+  {
+    id: 'dev',
+    label: '⚙️ Dev Docs',
+    desc: 'Architecture, data flow, security & stack',
+  },
+  {
+    id: 'readme',
+    label: '📄 README.md',
+    desc: 'GitHub-ready README with badges',
+  },
+  {
+    id: 'interview',
+    label: '🎯 Interview Prep',
+    desc: 'Q&A, pitch, cheat sheet — interview-ready',
+  },
+]
+
 export default function RepoInput({
   onGenerate,
   loading,
@@ -9,11 +32,33 @@ export default function RepoInput({
 }) {
   const [url, setUrl] = useState('')
   const [showToken, setShowToken] = useState(false)
+  const [showDocPicker, setShowDocPicker] = useState(false)
+  const [selectedDocs, setSelectedDocs] = useState([
+    'user',
+    'dev',
+    'readme',
+    'interview',
+  ])
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (url.trim()) onGenerate(url.trim())
+    if (url.trim()) onGenerate(url.trim(), selectedDocs)
   }
+
+  const toggleDoc = (id) => {
+    setSelectedDocs((prev) =>
+      prev.includes(id)
+        ? prev.length > 1
+          ? prev.filter((d) => d !== id)
+          : prev // keep at least 1
+        : [...prev, id],
+    )
+  }
+
+  const allSelected = selectedDocs.length === DOC_OPTIONS.length
+  const selectedLabels = DOC_OPTIONS.filter((d) => selectedDocs.includes(d.id))
+    .map((d) => d.label)
+    .join(', ')
 
   const examples = [
     'https://github.com/vercel/next.js',
@@ -64,6 +109,65 @@ export default function RepoInput({
           </button>
         </div>
 
+        {/* Doc type picker */}
+        <div className="doc-picker-row">
+          <button
+            type="button"
+            className="doc-picker-toggle"
+            onClick={() => setShowDocPicker((v) => !v)}
+          >
+            <span className="doc-picker-label">
+              📋 Generate:{' '}
+              <span className="doc-picker-count">
+                {allSelected
+                  ? 'All 4 docs'
+                  : `${selectedDocs.length} doc${selectedDocs.length > 1 ? 's' : ''}`}
+              </span>
+            </span>
+            <span className="toggle-arrow">{showDocPicker ? '▲' : '▼'}</span>
+          </button>
+        </div>
+
+        {showDocPicker && (
+          <div className="doc-picker-box">
+            <p className="doc-picker-hint">Choose which docs to generate:</p>
+            <div className="doc-options">
+              {DOC_OPTIONS.map((opt) => {
+                const checked = selectedDocs.includes(opt.id)
+                return (
+                  <label
+                    key={opt.id}
+                    className={`doc-option ${checked ? 'selected' : ''}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggleDoc(opt.id)}
+                      className="doc-checkbox"
+                    />
+                    <div className="doc-option-content">
+                      <span className="doc-option-label">{opt.label}</span>
+                      <span className="doc-option-desc">{opt.desc}</span>
+                    </div>
+                    {checked && <span className="doc-check">✓</span>}
+                  </label>
+                )
+              })}
+            </div>
+            <button
+              type="button"
+              className="select-all-btn"
+              onClick={() =>
+                setSelectedDocs(
+                  allSelected ? ['user'] : DOC_OPTIONS.map((d) => d.id),
+                )
+              }
+            >
+              {allSelected ? 'Deselect all' : 'Select all'}
+            </button>
+          </div>
+        )}
+
         {/* Private repo toggle */}
         <div className="private-row">
           <button
@@ -97,7 +201,7 @@ export default function RepoInput({
             />
             <p className="token-hint">
               Needs <code>repo</code> scope. Saved in your browser only — never
-              sent to our servers except to call GitHub's API.{' '}
+              sent to our servers except to call GitHub&apos;s API.{' '}
               <a
                 href="https://github.com/settings/tokens/new?scopes=repo&description=GitDoc"
                 target="_blank"

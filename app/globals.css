@@ -1026,3 +1026,550 @@ body {
   font-family: 'JetBrains Mono', monospace;
   margin-bottom: 16px;
 }
+/* ─────────────────────────────────────────────────────────────────────────── */
+/* ADD THESE TO YOUR globals.css — new styles for DocOutput + RepoInput        */
+/* ─────────────────────────────────────────────────────────────────────────── */
+
+/* ── Repo meta header ───────────────────────────────────────────────────── */
+
+.repo-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.repo-name {
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+}
+.repo-owner {
+  opacity: 0.55;
+}
+.repo-sep {
+  opacity: 0.25;
+  margin: 0 3px;
+}
+.repo-stats {
+  display: flex;
+  gap: 8px;
+}
+
+.stat-badge {
+  font-size: 0.75rem;
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  padding: 3px 10px;
+  border-radius: 20px;
+  color: #ffd700;
+  font-weight: 600;
+}
+
+.frontend-badge {
+  font-size: 0.65rem;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #a5b4fc;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+/* ── Language tags ───────────────────────────────────────────────────────── */
+
+.lang-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.74rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.lang-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--lang-color, #888);
+  flex-shrink: 0;
+}
+
+/* ── Tabs ────────────────────────────────────────────────────────────────── */
+
+.tab-badge {
+  display: block;
+  font-size: 0.63rem;
+  opacity: 0.5;
+  font-weight: 400;
+  margin-top: 1px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── View toggle ─────────────────────────────────────────────────────────── */
+
+.view-toggle {
+  display: flex;
+  gap: 3px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.view-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.73rem;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+  font-weight: 500;
+}
+.view-btn.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+.view-btn:hover:not(.active) {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.action-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ── Download group (format select + button) ─────────────────────────────── */
+
+.download-group {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.format-select {
+  background: rgba(255, 255, 255, 0.07);
+  border: none;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.75rem;
+  padding: 7px 10px;
+  cursor: pointer;
+  font-family: inherit;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 72px;
+}
+
+.format-select:focus {
+  background: rgba(255, 255, 255, 0.1);
+}
+.format-select option {
+  background: #1e1e2e;
+  color: #fff;
+}
+
+.download-group .action-btn.primary {
+  border-radius: 0;
+  border: none;
+  border-left: none;
+}
+
+/* ── Doc content ─────────────────────────────────────────────────────────── */
+
+.doc-content {
+  max-height: 68vh;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+.doc-content::-webkit-scrollbar {
+  width: 5px;
+}
+.doc-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.doc-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.raw-content {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.79rem;
+  line-height: 1.72;
+  color: rgba(255, 255, 255, 0.72);
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+  padding: 24px;
+}
+
+/* ─── Rendered markdown ──────────────────────────────────────────────────── */
+
+.rendered-content {
+  padding: 28px 32px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.md-h1 {
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  margin: 0 0 20px;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.md-h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 34px 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.md-h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.88);
+  margin: 22px 0 8px;
+  letter-spacing: -0.005em;
+}
+
+.md-p {
+  margin: 0 0 12px;
+  font-size: 0.88rem;
+  line-height: 1.78;
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.md-ul,
+.md-ol {
+  margin: 4px 0 14px;
+  padding-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.md-ul li,
+.md-ol li {
+  font-size: 0.87rem;
+  color: rgba(255, 255, 255, 0.76);
+  line-height: 1.65;
+}
+.md-ul li::marker {
+  color: rgba(255, 255, 255, 0.25);
+}
+.md-ol li::marker {
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 600;
+}
+
+.md-blockquote {
+  border-left: 3px solid rgba(130, 100, 255, 0.6);
+  padding: 10px 16px;
+  margin: 16px 0;
+  background: rgba(130, 100, 255, 0.07);
+  border-radius: 0 8px 8px 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.md-hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  margin: 24px 0;
+}
+.md-spacer {
+  height: 5px;
+}
+
+.inline-code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.8em;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: #c9d1d9;
+}
+
+.md-link {
+  color: #818cf8;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(129, 140, 248, 0.3);
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+}
+.md-link:hover {
+  color: #a5b4fc;
+  border-bottom-color: rgba(165, 180, 252, 0.5);
+}
+
+/* ── Code blocks ─────────────────────────────────────────────────────────── */
+
+.code-block {
+  position: relative;
+  margin: 16px 0;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+.code-block pre {
+  margin: 0;
+  padding: 16px 20px;
+  overflow-x: auto;
+}
+.code-block pre code {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.78rem;
+  line-height: 1.65;
+  color: #e2e8f0;
+  white-space: pre;
+}
+.code-block pre::-webkit-scrollbar {
+  height: 4px;
+}
+.code-block pre::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+/* ASCII diagrams */
+.diagram-block {
+  background: rgba(10, 15, 40, 0.7);
+  border: 1px solid rgba(99, 130, 255, 0.18);
+  box-shadow: 0 0 24px rgba(99, 130, 255, 0.04);
+}
+.diagram-block pre code {
+  color: #93c5fd;
+}
+
+.code-lang {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 0.62rem;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom-left-radius: 6px;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.diagram-label {
+  color: rgba(99, 130, 255, 0.65) !important;
+}
+
+/* ── Tables ──────────────────────────────────────────────────────────────── */
+
+.table-wrapper {
+  overflow-x: auto;
+  margin: 14px 0;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.md-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+.md-table th {
+  background: rgba(255, 255, 255, 0.06);
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.88);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  white-space: nowrap;
+}
+.md-table td {
+  padding: 8px 14px;
+  color: rgba(255, 255, 255, 0.7);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  vertical-align: top;
+}
+.md-table tr:last-child td {
+  border-bottom: none;
+}
+.md-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* ── Screenshots ─────────────────────────────────────────────────────────── */
+
+.md-screenshot {
+  margin: 20px 0;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.3);
+}
+.repo-screenshot {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: cover;
+  object-position: top;
+}
+.screenshot-label {
+  display: block;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.4);
+  padding: 8px 14px;
+  background: rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+/* ── Doc picker (RepoInput) ──────────────────────────────────────────────── */
+
+.doc-picker-row {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.doc-picker-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+  padding: 7px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.doc-picker-toggle:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.doc-picker-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.doc-picker-count {
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  color: #a5b4fc;
+  padding: 1px 8px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.doc-picker-box {
+  margin-top: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.doc-picker-hint {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.doc-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.doc-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: all 0.15s;
+  background: rgba(255, 255, 255, 0.02);
+  user-select: none;
+}
+.doc-option:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+.doc-option.selected {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.35);
+}
+
+.doc-checkbox {
+  display: none;
+} /* hidden — we use the label styling */
+
+.doc-option-content {
+  flex: 1;
+}
+.doc-option-label {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+}
+.doc-option-desc {
+  display: block;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 2px;
+}
+
+.doc-check {
+  font-size: 0.85rem;
+  color: #818cf8;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.select-all-btn {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.75rem;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.select-all-btn:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.7);
+}

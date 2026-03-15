@@ -7,18 +7,19 @@ const LOADING_MESSAGES = [
   'Reading the codebase...',
   'Analyzing architecture & tech decisions...',
   'Writing docs that actually make sense...',
+  'Prepping your interview answers...',
 ]
 
 const CACHE_PREFIX = 'gitdoc_cache_'
 const CACHE_TTL = 7 * 24 * 60 * 60 * 1000 // 7 days
 
-function getCached(url) {
+function getCached(key) {
   try {
-    const raw = localStorage.getItem(CACHE_PREFIX + url)
+    const raw = localStorage.getItem(CACHE_PREFIX + key)
     if (!raw) return null
     const { data, ts } = JSON.parse(raw)
     if (Date.now() - ts > CACHE_TTL) {
-      localStorage.removeItem(CACHE_PREFIX + url)
+      localStorage.removeItem(CACHE_PREFIX + key)
       return null
     }
     return data
@@ -27,10 +28,10 @@ function getCached(url) {
   }
 }
 
-function setCache(url, data) {
+function setCache(key, data) {
   try {
     localStorage.setItem(
-      CACHE_PREFIX + url,
+      CACHE_PREFIX + key,
       JSON.stringify({ data, ts: Date.now() }),
     )
   } catch {}
@@ -44,7 +45,6 @@ export default function HomeClient() {
   const [fromCache, setFromCache] = useState(false)
   const [userToken, setUserToken] = useState('')
 
-  // Restore saved token on mount
   useEffect(() => {
     try {
       const saved = localStorage.getItem('gitdoc_user_token')
@@ -60,9 +60,10 @@ export default function HomeClient() {
     } catch {}
   }
 
-  const handleGenerate = async (url) => {
-    // Serve from cache if available (offline support)
-    const cached = getCached(url)
+  const handleGenerate = async (url, selectedDocs) => {
+    // Cache key includes selected docs so different selections cache separately
+    const cacheKey = `${url}__${[...(selectedDocs || [])].sort().join(',')}`
+    const cached = getCached(cacheKey)
     if (cached) {
       setResult(cached)
       setFromCache(true)
@@ -84,12 +85,16 @@ export default function HomeClient() {
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, userToken: userToken || null }),
+        body: JSON.stringify({
+          url,
+          userToken: userToken || null,
+          selectedDocs: selectedDocs || null,
+        }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
       setResult(data)
-      setCache(url, data)
+      setCache(cacheKey, data)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -110,7 +115,7 @@ export default function HomeClient() {
         <div className="loading-state">
           <div className="spinner" />
           <p>{LOADING_MESSAGES[loadingMsg]}</p>
-          <small>Usually takes 20–40 seconds</small>
+          <small>Usually takes 20–60 seconds depending on docs selected</small>
         </div>
       )}
       {error && <div className="error-box">❌ {error}</div>}
