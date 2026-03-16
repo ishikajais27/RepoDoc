@@ -753,12 +753,16 @@ const LANG_COLORS = {
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
-export default function DocOutput({ data }) {
+export default function DocOutput({ data, onRegenerate, regenerating }) {
   const availableTabs = ALL_TABS.filter((t) => data[t.id])
   const [activeTab, setActiveTab] = useState(availableTabs[0]?.id || 'user')
   const [viewMode, setViewMode] = useState('rendered')
   const [copied, setCopied] = useState(false)
   const [format, setFormat] = useState('md')
+  const [regenNote, setRegenNote] = useState('')
+  const [showRegenInput, setShowRegenInput] = useState(false)
+  const [gistLoading, setGistLoading] = useState(false)
+  const [shareUrl, setShareUrl] = useState('')
   const contentRef = useRef(null)
 
   useEffect(() => {
@@ -772,6 +776,61 @@ export default function DocOutput({ data }) {
     navigator.clipboard.writeText(current)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  const handleShareLink = () => {
+    const url = `${window.location.origin}?repo=https://github.com/${data.repoData.owner}/${data.repoData.repo}`
+    navigator.clipboard.writeText(url)
+    setShareUrl(url)
+    setTimeout(() => setShareUrl(''), 2500)
+  }
+
+  const handlePushToGist = async () => {
+    const token = prompt(
+      'Enter your GitHub token (needs gist scope) to push to Gist:\n\nGet one at github.com/settings/tokens/new?scopes=gist',
+    )
+    if (!token) return
+    setGistLoading(true)
+    try {
+      const names = {
+        user: 'user-docs.md',
+        dev: 'dev-docs.md',
+        readme: 'README.md',
+        interview: 'interview-prep.md',
+      }
+      const res = await fetch('https://api.github.com/gists', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          description: `${repoName} — GitDoc generated documentation`,
+          public: false,
+          files: { [names[activeTab] || 'doc.md']: { content: current } },
+        }),
+      })
+      const gist = await res.json()
+      if (!res.ok) throw new Error(gist.message || 'Gist creation failed')
+      window.open(gist.html_url, '_blank')
+    } catch (err) {
+      alert(`Gist failed: ${err.message}`)
+    } finally {
+      setGistLoading(false)
+    }
+  }
+
+  const handleRegenSection = () => {
+    if (showRegenInput && regenNote.trim()) {
+      onRegenerate(activeTab, regenNote)
+      setShowRegenInput(false)
+      setRegenNote('')
+    } else if (showRegenInput) {
+      onRegenerate(activeTab, '')
+      setShowRegenInput(false)
+    } else {
+      setShowRegenInput(true)
+    }
   }
 
   const handleDownload = async () => {
@@ -1311,8 +1370,35 @@ export default function DocOutput({ data }) {
             </button>
           </div>
           <div className="doc-actions__right">
+            {onRegenerate && (
+              <button
+                className="action-btn"
+                onClick={handleRegenSection}
+                disabled={!!regenerating}
+                title="Regenerate this section — optionally add a note"
+              >
+                {regenerating === activeTab
+                  ? '⟳ Regenerating…'
+                  : '↺ Regenerate'}
+              </button>
+            )}
             <button className="action-btn" onClick={handleCopy}>
               {copied ? '✅ Copied' : '📋 Copy'}
+            </button>
+            <button
+              className="action-btn"
+              onClick={handleShareLink}
+              title="Copy link to this repo"
+            >
+              {shareUrl ? '🔗 Copied!' : '🔗 Share'}
+            </button>
+            <button
+              className="action-btn"
+              onClick={handlePushToGist}
+              disabled={gistLoading}
+              title="Push to GitHub Gist"
+            >
+              {gistLoading ? '⟳ Pushing…' : '↑ Gist'}
             </button>
             <div className="dl-group">
               <select
@@ -1333,6 +1419,73 @@ export default function DocOutput({ data }) {
             </div>
           </div>
         </div>
+
+        {/* Regenerate instruction input */}
+        {showRegenInput && (
+          <div
+            style={{
+              display: 'flex',
+              gap: '8px',
+              padding: '10px 16px',
+              background: 'var(--bg-secondary,#f9fafb)',
+              borderBottom: '1px solid var(--border,#e5e7eb)',
+              alignItems: 'center',
+            }}
+          >
+            <input
+              type="text"
+              value={regenNote}
+              onChange={(e) => setRegenNote(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleRegenSection()
+              }}
+              placeholder='Optional: "make it simpler", "focus on security", "add more examples"...'
+              style={{
+                flex: 1,
+                padding: '6px 12px',
+                borderRadius: '6px',
+                fontSize: '13px',
+                border: '1px solid var(--border,#e5e7eb)',
+                background: 'transparent',
+                outline: 'none',
+              }}
+              autoFocus
+            />
+            <button
+              onClick={handleRegenSection}
+              style={{
+                padding: '6px 14px',
+                borderRadius: '6px',
+                fontSize: '13px',
+                cursor: 'pointer',
+                background: '#4f46e5',
+                color: '#fff',
+                border: 'none',
+                fontWeight: 600,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Regenerate ↺
+            </button>
+            <button
+              onClick={() => {
+                setShowRegenInput(false)
+                setRegenNote('')
+              }}
+              style={{
+                padding: '6px 10px',
+                borderRadius: '6px',
+                fontSize: '13px',
+                cursor: 'pointer',
+                background: 'none',
+                border: '1px solid var(--border,#e5e7eb)',
+              }}
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         <div ref={contentRef} className="doc-body">
           {viewMode === 'raw' ? (
             <pre className="doc-raw">{current}</pre>

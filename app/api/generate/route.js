@@ -26,21 +26,32 @@ async function callGroq(prompt) {
 }
 
 const DOC_BUILDERS = {
-  user: (r) => buildUserDocPrompt(r),
-  dev: (r) => buildDevDocPrompt(r),
-  readme: (r) => buildReadmePrompt(r),
-  interview: (r) => buildInterviewPrepPrompt(r),
+  user: (r, opts) => buildUserDocPrompt(r, opts),
+  dev: (r, opts) => buildDevDocPrompt(r, opts),
+  readme: (r, opts) => buildReadmePrompt(r, opts),
+  interview: (r, opts) => buildInterviewPrepPrompt(r, opts),
 }
 
 export async function POST(req) {
   try {
-    const { url, userToken, selectedDocs } = await req.json()
+    const {
+      url,
+      userToken,
+      selectedDocs,
+      options = {},
+      regenerateInstruction,
+    } = await req.json()
     if (!url) return Response.json({ error: 'URL required' }, { status: 400 })
 
     const docsToGenerate =
       Array.isArray(selectedDocs) && selectedDocs.length > 0
         ? selectedDocs
         : ['user', 'dev', 'readme', 'interview']
+
+    // Merge regeneration instruction into options so audienceContext() picks it up
+    const opts = regenerateInstruction
+      ? { ...options, extraInstruction: regenerateInstruction }
+      : options
 
     const { owner, repo } = await parseRepoUrl(url)
     const repoData = await fetchRepoData(owner, repo, userToken)
@@ -51,7 +62,7 @@ export async function POST(req) {
         .filter((d) => DOC_BUILDERS[d])
         .map(async (docType, i) => {
           await new Promise((r) => setTimeout(r, i * 600))
-          const content = await callGroq(DOC_BUILDERS[docType](repoData))
+          const content = await callGroq(DOC_BUILDERS[docType](repoData, opts))
           return [docType, content]
         }),
     )
