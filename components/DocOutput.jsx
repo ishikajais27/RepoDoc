@@ -498,6 +498,7 @@ function renderMarkdown(text) {
   const lines = text.split('\n')
   const out = []
   let i = 0
+  let k = 0 // monotonic key counter — never resets, never collides
   while (i < lines.length) {
     const line = lines[i]
 
@@ -512,7 +513,7 @@ function renderMarkdown(text) {
       const raw = code.join('\n')
       const isDiagram = !lang && /[┌│└─▶→▲▼╔╗╚╝║═┐┘├┤┬┴┼]/.test(raw)
       out.push(
-        <div key={i} className={`cb ${isDiagram ? 'cb--diagram' : ''}`}>
+        <div key={k++} className={`cb ${isDiagram ? 'cb--diagram' : ''}`}>
           {(lang || isDiagram) && (
             <span
               className={`cb__lang ${isDiagram ? 'cb__lang--diagram' : ''}`}
@@ -546,7 +547,7 @@ function renderMarkdown(text) {
         i++
       }
       out.push(
-        <div key={i} className="tbl-wrap">
+        <div key={k++} className="tbl-wrap">
           <table className="md-tbl">
             <thead>
               <tr>
@@ -573,7 +574,7 @@ function renderMarkdown(text) {
     const imgMatch = line.match(/^!\[(.+?)\]\((.+?)\)$/)
     if (imgMatch) {
       out.push(
-        <div key={i} className="md-img-wrap">
+        <div key={k++} className="md-img-wrap">
           <img
             src={imgMatch[2]}
             alt={imgMatch[1]}
@@ -591,7 +592,7 @@ function renderMarkdown(text) {
 
     if (line.startsWith('>')) {
       out.push(
-        <blockquote key={i} className="md-bq">
+        <blockquote key={k++} className="md-bq">
           {inlineMarkdown(line.slice(1).trim())}
         </blockquote>,
       )
@@ -602,7 +603,7 @@ function renderMarkdown(text) {
     const h1 = line.match(/^# (.+)/)
     if (h1) {
       out.push(
-        <h1 key={i} className="md-h1">
+        <h1 key={k++} className="md-h1">
           {inlineMarkdown(h1[1])}
         </h1>,
       )
@@ -612,7 +613,7 @@ function renderMarkdown(text) {
     const h2 = line.match(/^## (.+)/)
     if (h2) {
       out.push(
-        <h2 key={i} className="md-h2">
+        <h2 key={k++} className="md-h2">
           {inlineMarkdown(h2[1])}
         </h2>,
       )
@@ -622,7 +623,7 @@ function renderMarkdown(text) {
     const h3 = line.match(/^### (.+)/)
     if (h3) {
       out.push(
-        <h3 key={i} className="md-h3">
+        <h3 key={k++} className="md-h3">
           {inlineMarkdown(h3[1])}
         </h3>,
       )
@@ -631,19 +632,20 @@ function renderMarkdown(text) {
     }
 
     if (/^---+$/.test(line.trim())) {
-      out.push(<hr key={i} className="md-hr" />)
+      out.push(<hr key={k++} className="md-hr" />)
       i++
       continue
     }
 
     if (/^[-*] /.test(line)) {
+      const startK = k++
       const items = []
       while (i < lines.length && /^[-*] /.test(lines[i])) {
         items.push(lines[i].replace(/^[-*] /, ''))
         i++
       }
       out.push(
-        <ul key={i} className="md-ul">
+        <ul key={startK} className="md-ul">
           {items.map((it, j) => (
             <li key={j}>{inlineMarkdown(it)}</li>
           ))}
@@ -653,13 +655,14 @@ function renderMarkdown(text) {
     }
 
     if (/^\d+\. /.test(line)) {
+      const startK = k++
       const items = []
       while (i < lines.length && /^\d+\. /.test(lines[i])) {
         items.push(lines[i].replace(/^\d+\. /, ''))
         i++
       }
       out.push(
-        <ol key={i} className="md-ol">
+        <ol key={startK} className="md-ol">
           {items.map((it, j) => (
             <li key={j}>{inlineMarkdown(it)}</li>
           ))}
@@ -669,12 +672,12 @@ function renderMarkdown(text) {
     }
 
     if (!line.trim()) {
-      out.push(<div key={i} className="md-sp" />)
+      out.push(<div key={k++} className="md-sp" />)
       i++
       continue
     }
     out.push(
-      <p key={i} className="md-p">
+      <p key={k++} className="md-p">
         {inlineMarkdown(line)}
       </p>,
     )
@@ -809,13 +812,13 @@ export default function DocOutput({ data }) {
     if (format === 'docx') {
       try {
         if (!window.docx) {
-          const script = document.createElement('script')
-          script.src =
-            'https://cdnjs.cloudflare.com/ajax/libs/docx/9.0.2/docx.umd.min.js'
           await new Promise((res, rej) => {
-            script.onload = res
-            script.onerror = rej
-            document.head.appendChild(script)
+            const s = document.createElement('script')
+            s.src =
+              'https://cdnjs.cloudflare.com/ajax/libs/docx/9.0.2/docx.umd.min.js'
+            s.onload = res
+            s.onerror = rej
+            document.head.appendChild(s)
           })
         }
         const {
@@ -823,16 +826,16 @@ export default function DocOutput({ data }) {
           Packer,
           Paragraph,
           TextRun,
-          HeadingLevel,
           Table,
           TableRow,
           TableCell,
           WidthType,
           BorderStyle,
           AlignmentType,
-          ShadingType,
-          convertInchesToTwip,
         } = window.docx
+
+        // 1 inch = 1440 twips
+        const inch = (n) => Math.round(n * 1440)
 
         const accentMap = {
           user: '7C3AED',
@@ -850,10 +853,10 @@ export default function DocOutput({ data }) {
         const light = lightMap[activeTab] || 'F5F3FF'
 
         const docTitles = {
-          user: `${repoName} — User Guide`,
-          dev: `${repoName} — Developer Documentation`,
-          readme: `${repoName} — README`,
-          interview: `${repoName} — Interview Preparation`,
+          user: `${repoName} \u2014 User Guide`,
+          dev: `${repoName} \u2014 Developer Documentation`,
+          readme: `${repoName} \u2014 README`,
+          interview: `${repoName} \u2014 Interview Preparation`,
         }
 
         const children = []
@@ -877,7 +880,7 @@ export default function DocOutput({ data }) {
           new Paragraph({
             children: [
               new TextRun({
-                text: `Generated by GitDoc  ·  ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`,
+                text: `Generated by GitDoc  \u00b7  ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`,
                 size: 20,
                 color: '9CA3AF',
                 italics: true,
@@ -992,15 +995,19 @@ export default function DocOutput({ data }) {
           if (line.startsWith('> ')) {
             children.push(
               new Paragraph({
-                children: parseInlineDocx(line.slice(2), TextRun).map(
-                  (r) => new TextRun({ ...r, italics: true }),
-                ),
+                children: [
+                  new TextRun({
+                    text: line.slice(2),
+                    italics: true,
+                    color: '374151',
+                    size: 22,
+                  }),
+                ],
                 indent: { left: 720 },
                 spacing: { before: 80, after: 80 },
                 border: {
                   left: { color: accent, size: 18, style: BorderStyle.SINGLE },
                 },
-                shading: { type: ShadingType.CLEAR, fill: light },
               }),
             )
             continue
@@ -1045,11 +1052,10 @@ export default function DocOutput({ data }) {
                     text: codeLines.join('\n'),
                     font: 'Courier New',
                     size: 18,
-                    color: 'E2E8F0',
+                    color: '334155',
                   }),
                 ],
                 spacing: { before: 140, after: 140 },
-                shading: { type: ShadingType.CLEAR, fill: '0F172A' },
                 indent: { left: 360, right: 360 },
               }),
             )
@@ -1087,12 +1093,11 @@ export default function DocOutput({ data }) {
                             bold: true,
                             color: 'FFFFFF',
                             size: 20,
-                            font: 'Segoe UI',
                           }),
                         ],
                       }),
                     ],
-                    shading: { type: ShadingType.CLEAR, fill: accent },
+                    shading: { fill: accent, color: accent, val: 'clear' },
                     width: { size: colW, type: WidthType.DXA },
                     margins: { top: 80, bottom: 80, left: 120, right: 120 },
                   }),
@@ -1111,8 +1116,9 @@ export default function DocOutput({ data }) {
                           }),
                         ],
                         shading: {
-                          type: ShadingType.CLEAR,
                           fill: ri % 2 === 0 ? 'FFFFFF' : light,
+                          color: 'auto',
+                          val: 'clear',
                         },
                         width: { size: colW, type: WidthType.DXA },
                         margins: { top: 60, bottom: 60, left: 120, right: 120 },
@@ -1175,10 +1181,10 @@ export default function DocOutput({ data }) {
               properties: {
                 page: {
                   margin: {
-                    top: convertInchesToTwip(1),
-                    bottom: convertInchesToTwip(1),
-                    left: convertInchesToTwip(1.2),
-                    right: convertInchesToTwip(1.2),
+                    top: inch(1),
+                    bottom: inch(1),
+                    left: inch(1.2),
+                    right: inch(1.2),
                   },
                 },
               },
@@ -1196,7 +1202,7 @@ export default function DocOutput({ data }) {
         URL.revokeObjectURL(url)
       } catch (err) {
         console.error('DOCX generation failed:', err)
-        alert('DOCX generation failed — try .md instead')
+        alert(`DOCX failed: ${err && err.message ? err.message : String(err)}`)
       }
       return
     }
