@@ -196,6 +196,8 @@ export default function RepoInput({
               </svg>
             </span>
             <input
+              id="repo-url"
+              name="repo-url"
               type="url"
               value={url}
               onChange={(e) => {
@@ -529,6 +531,8 @@ export default function RepoInput({
           {showToken && (
             <div className="token-box" style={{ marginTop: '8px' }}>
               <input
+                id="github-token"
+                name="github-token"
                 type="password"
                 value={userToken}
                 onChange={(e) => onTokenChange(e.target.value)}

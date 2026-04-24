@@ -1433,6 +1433,8 @@ export default function DocOutput({ data, onRegenerate, regenerating }) {
             }}
           >
             <input
+              id="regen-note"
+              name="regen-note"
               type="text"
               value={regenNote}
               onChange={(e) => setRegenNote(e.target.value)}
