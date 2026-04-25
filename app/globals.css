@@ -1348,3 +1348,176 @@ body {
     align-items: flex-start;
   }
 }
+
+.error-box {
+  background: rgba(255, 80, 80, 0.1);
+  border: 1px solid rgba(255, 80, 80, 0.3);
+  border-radius: 10px;
+  padding: 16px 20px;
+  color: #ff6b6b;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.error-box strong {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Source badge variants ────────────────────────────────────────────────── */
+/* cache-badge already exists. These extend it for dedup. */
+.cache-badge--dedup {
+  display: inline-block;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  color: #a5b4fc;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-family: 'JetBrains Mono', monospace;
+  margin-bottom: 16px;
+}
+
+/* ── Metrics panel ────────────────────────────────────────────────────────── */
+.metrics-panel {
+  margin-top: 8px;
+  padding: 16px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  animation: dropdown-in 0.15s ease;
+}
+
+.metrics-panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.metrics-panel__title {
+  font-weight: 700;
+  color: var(--text);
+  font-size: 0.8rem;
+}
+
+.metrics-panel__refresh {
+  font-size: 0.72rem;
+  color: var(--accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+  transition: opacity 0.15s;
+}
+.metrics-panel__refresh:hover {
+  opacity: 0.7;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.metrics-section__label {
+  color: var(--muted);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.metrics-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 0;
+}
+
+.metrics-row__label {
+  color: var(--muted);
+}
+
+.metrics-row__value {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.metrics-row__value--good {
+  color: #4ade80;
+}
+.metrics-row__value--warn {
+  color: #fbbf24;
+}
+.metrics-row__value--error {
+  color: #f87171;
+}
+
+.metrics-model-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.metrics-model-tag {
+  font-size: 0.72rem;
+  background: rgba(124, 106, 255, 0.1);
+  border: 1px solid rgba(124, 106, 255, 0.2);
+  border-radius: 6px;
+  padding: 2px 8px;
+  color: #a5b4fc;
+}
+
+.metrics-model-tag__failures {
+  color: #f87171;
+  margin-left: 4px;
+}
+
+/* ── Metrics toggle button ────────────────────────────────────────────────── */
+.metrics-toggle {
+  font-size: 0.75rem;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
+  float: right;
+  margin-top: 8px;
+}
+.metrics-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ── Loading state timing indicator ──────────────────────────────────────── */
+.loading-state__elapsed {
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Retry-after countdown ────────────────────────────────────────────────── */
+.retry-countdown {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.retry-countdown strong {
+  font-family: 'JetBrains Mono', monospace;
+  color: #ff6b6b;
+}
